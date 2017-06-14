@@ -72,6 +72,11 @@ function getHookScript (hookName, relativePath, cmd) {
     'has_hook_script () {',
     '  [ -f package.json ] && cat package.json | grep -q "\\"$1\\"[[:space:]]*:"',
     '}',
+    '',
+
+    'use_env_flag () {',
+    '  [ -f package.json ] && cat package.json | grep \'"husky_env_flag":\' package.json | cut -d\\" -f4',
+    '}',
     ''
   ]
 
@@ -81,7 +86,13 @@ function getHookScript (hookName, relativePath, cmd) {
     // Fix for issue #16 #24
     // If script is not defined in package.json then exit
     'has_hook_script ' + cmd + ' || exit 0',
-    ''
+    '',
+
+    'ENV_FLAG=$(use_env_flag)',
+    '',
+    'if [ ! -z "$ENV_FLAG" ]; then',
+    '  env | grep -q $ENV_FLAG || exit 0',
+    'fi'
   ])
 
   // On OS X and Linux, try to use nvm if it's installed
